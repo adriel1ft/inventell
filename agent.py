@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 logger.info("Loading environment variables...")
 load_dotenv()
-api_key = st.secrets.get("OPENAI_API_KEY")
+api_key = os.getenv("OPENAI_API_KEY") #st.secrets.get("OPENAI_API_KEY") or 
 logger.debug(f"OPENAI_API_KEY loaded: {bool(api_key)}")
 
 
