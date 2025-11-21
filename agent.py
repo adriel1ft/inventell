@@ -18,9 +18,11 @@ logger = logging.getLogger(__name__)
 
 logger.info("Loading environment variables...")
 load_dotenv()
-logger.debug(f"OPENAI_API_KEY loaded: {bool(st.secrets.get("OPENAI_API_KEY"))}")
+api_key = st.secrets.get("OPENAI_API_KEY")
+logger.debug(f"OPENAI_API_KEY loaded: {bool(api_key)}")
 
-if not st.secrets.get("OPENAI_API_KEY"):
+
+if not api_key:
     raise ValueError("OPENAI_API_KEY environment variable not found. Please check your .env file.")
 
 BASE_DIR = Path(__file__).resolve().parent
