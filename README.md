@@ -1,4 +1,4 @@
-# 🧠 InvenTell - Intelligent Inventory Agent
+# 📦 InvenTell - Intelligent Inventory Agent
 
 [![Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](http://localhost:8501)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://python.org)
@@ -35,4 +35,5 @@ copy .env.example .env  # Add your OPENAI_API_KEY
 python prepare_data.py
 
 # 5. Launch application
+
 streamlit run app.py
