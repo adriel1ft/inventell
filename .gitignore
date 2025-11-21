@@ -36,10 +36,6 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# Database
-*.db
-*.sqlite
-*.sqlite3
 
 # IDE
 .vscode/
