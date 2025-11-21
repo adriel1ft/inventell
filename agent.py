@@ -5,19 +5,16 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_community.utilities import SQLDatabase
 from langchain_community.agent_toolkits import SQLDatabaseToolkit
-from langchain.tools import BaseTool
+from langchain.tools import Tool
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain.prompts import PromptTemplate
 
-
-# Configure logging
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-# Load environment variables
 logger.info("Loading environment variables...")
 load_dotenv()
 logger.debug(f"OPENAI_API_KEY loaded: {bool(os.getenv('OPENAI_API_KEY'))}")
@@ -25,11 +22,8 @@ logger.debug(f"OPENAI_API_KEY loaded: {bool(os.getenv('OPENAI_API_KEY'))}")
 if not os.getenv("OPENAI_API_KEY"):
     raise ValueError("OPENAI_API_KEY environment variable not found. Please check your .env file.")
 
-
-# Get the directory where this script is located
 BASE_DIR = Path(__file__).resolve().parent
 DATABASE_PATH = BASE_DIR / "inventory.db"
-
 
 def case_insensitive_inventory_query(product_name: str, db):
     query = "SELECT * FROM inventory WHERE LOWER(name) = LOWER(?)"
@@ -44,8 +38,7 @@ def initialize_agent():
     
     logger.info("Initializing SQL Agent...")
     
-    # Initialize LLM
-    logger.debug("Initializing ChatOpenAI LLM with model: gpt-5-mini")
+    logger.debug("Initializing ChatOpenAI LLM with model: gpt-4o-mini")
     try:
         llm = ChatOpenAI(
             model="gpt-4o-mini",
@@ -56,7 +49,6 @@ def initialize_agent():
         logger.error(f"Failed to initialize ChatOpenAI: {str(e)}", exc_info=True)
         raise
     
-    # Connect to database
     logger.debug(f"Connecting to database at: {DATABASE_PATH}")
     try:
         db_url = f"sqlite:///{DATABASE_PATH}"
@@ -67,13 +59,12 @@ def initialize_agent():
         logger.error(f"Failed to connect to database: {str(e)}", exc_info=True)
         raise
     
-    # Create toolkit
     logger.debug("Creating SQLDatabaseToolkit...")
     toolkit = SQLDatabaseToolkit(db=db, llm=llm)
     logger.debug(f"Available tools: {[tool.name for tool in toolkit.get_tools()]}")
 
     # Add custom case-insensitive inventory query tool as a lambda tool
-    from langchain.tools import Tool
+    
     ci_inventory_tool = Tool(
         name="case_insensitive_inventory_query",
         description="Query inventory table for product names using case-insensitive matching.",
@@ -107,7 +98,7 @@ Question: {input}
 Thought:{agent_scratchpad}
 """)
     logger.debug("Prompt template created successfully")
-    # Create the agent
+    # C
     logger.debug("Creating ReAct agent...")
     agent = create_react_agent(
         llm=llm,
