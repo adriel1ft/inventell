@@ -2,7 +2,6 @@ import os
 import streamlit as st
 from pathlib import Path
 from dotenv import load_dotenv
-# Garante que a função de inicialização do agente seja importada
 from agent import initialize_agent 
 
 # Load environment variables
@@ -20,7 +19,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Definição do CSS embutido (Corrigido e Aprimorado)
 CUSTOM_CSS = """
 <style>
     /* Main colors */
@@ -201,7 +199,6 @@ def get_agent():
         return str(e), False
 
 def main():
-    # Injeta o CSS customizado
     st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
     
     # --- HEADER ---
@@ -212,9 +209,7 @@ def main():
         </div>
                 
     """, unsafe_allow_html=True)
-    
-    # Check if database exists
-    # Usamos Path().exists() para um check mais seguro
+
     if not DATABASE_PATH.exists():
         st.error("⚠️ Database not found! Please run `python create_db.py` first.")
         return
@@ -223,11 +218,9 @@ def main():
     agent_result, success = get_agent()
     
     if not success:
-        # Se falhou, agent_result contém a string de erro
         st.error(f"❌ Failed to initialize the agent. Please check your API key and database configuration. Error: {agent_result}")
         return
     
-    # Se sucesso, agent_result é o executor
     agent_executor = agent_result
     
     # --- Sidebar - Info Panel (Visualmente melhorada) ---
@@ -264,9 +257,7 @@ def main():
     
     # --- Chat Logic ---
     
-    # Initialize session state for conversation history
     if "messages" not in st.session_state:
-        # Initial message in English
         st.session_state.messages = [{"role": "assistant", "content": "Hello! I'm your Intelligent Inventory Assistant. Ask me anything about your stock!"}]
     
     # Display chat history
@@ -274,7 +265,6 @@ def main():
         with st.chat_message(message["role"], avatar=None):
             st.markdown(message["content"])
     
-    # User input (mantém o st.chat_input no final para que ele fique fixo)
     user_input = st.chat_input("💬 Ask a question about your inventory...")
     
     if user_input:
@@ -285,24 +275,19 @@ def main():
         with st.chat_message("user", avatar=None):
             st.markdown(user_input)
         
-        # Generate response
+        
         with st.spinner("🔄 Processing your question..."):
             try:
-                # O LangChain 0.2.x usa invoke, que retorna um dicionário
                 result = agent_executor.invoke({"input": user_input})
                 response = result.get("output", "Unable to process the query.")
             except Exception as e:
-                # Tratamento de erro aprimorado
                 response = f"❌ Agent Execution Error: Desculpe, não consegui processar a consulta. Tente ser mais específico. Detalhes: {str(e)}"
         
-        # Add assistant message to history
         st.session_state.messages.append({"role": "assistant", "content": response})
         
-        # Display assistant response
         with st.chat_message("assistant", avatar=None):
             st.markdown(response)
 
 if __name__ == "__main__":
-    # Carrega variáveis de ambiente aqui, antes de qualquer inicialização
     load_dotenv() 
     main()
