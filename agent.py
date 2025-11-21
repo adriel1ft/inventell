@@ -8,6 +8,7 @@ from langchain_community.agent_toolkits import SQLDatabaseToolkit
 from langchain.tools import Tool
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain.prompts import PromptTemplate
+import streamlit as st
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 logger.info("Loading environment variables...")
 load_dotenv()
-logger.debug(f"OPENAI_API_KEY loaded: {bool(os.getenv('OPENAI_API_KEY'))}")
+logger.debug(f"OPENAI_API_KEY loaded: {bool(st.secrets.get("OPENAI_API_KEY"))}")
 
 if not os.getenv("OPENAI_API_KEY"):
     raise ValueError("OPENAI_API_KEY environment variable not found. Please check your .env file.")
