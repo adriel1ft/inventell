@@ -1,7 +1,7 @@
-import os
 import streamlit as st
 from pathlib import Path
 from dotenv import load_dotenv
+# Assuming agent.py exists in the same folder
 from agent import initialize_agent 
 
 # Load environment variables
@@ -13,189 +13,110 @@ DATABASE_PATH = BASE_DIR / "inventory.db"
 
 # Page configuration
 st.set_page_config(
-    page_title="📦 Inventory Management System",
+    page_title="Inventory Management System",
     page_icon="📦",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
+# --- IMPROVED CSS ---
+# We use var(--text-color) and var(--secondary-background-color) 
+# so Streamlit handles the switching between Light and Dark modes automatically.
 CUSTOM_CSS = """
 <style>
-    /* Main colors */
+    /* Define brand colors that look good in both modes */
     :root {
-        --primary-color: #2E86AB;
-        --secondary-color: #A23B72;
-        --success-color: #06A77D;
-        --warning-color: #F18F01;
-        --danger-color: #C1121F;
-        --light-bg: #F5F7FA;
-          .stChatInputContainer, .stTextInput, .stTextArea {
-        background: transparent !important;
-        box-shadow: none !important;
+        --brand-primary: #2E86AB;
+        --brand-secondary: #A23B72;
+        --brand-accent: #F18F01;
     }
- 
-    
-    /* Global background */
-    .main {
-        /* Garante que o fundo seja claro e suave */
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-    }
-    
-    /* 1. Chat input FIX: Remove o fundo e alinha */
-    div.stChatInput {
-        /* Remove o padding e a margem padrão para grudar na borda inferior */
-        margin: 0 !important;
-        padding: 0 1rem 0 0 !important; /* Adiciona padding à direita para compensar o layout wide */
-        width: 100% !important; 
-    }
-    /* Remove o fundo branco/cinza do container interno da barra de chat */
-    div.stChatInput > div:first-child { 
-        background-color: transparent !important; 
-        border: none !important;
-    }
-    
-    /* Estilo do Input Text (barra em si) */
-    .stChatInput > div > div > div:first-child {
-        border-radius: 12px !important;
-        border: 2px solid var(--primary-color) !important;
-        padding: 8px !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        background-color: white !important;
-    }
-    
-    /* Remove a borda redonda do botão de envio */
-    .stChatInput button {
-        border-radius: 0 !important;
-        border: none !important;
-        background-color: transparent !important;
-        padding: 0 !important;
-    }
-    
-    /* Remove o círculo azul (loading indicator) */
-    .stChatInput > div > div > svg {
-        display: none !important;
-    }
-    
-    /* Remove qualquer elemento circular desnecessário */
-    .stChatInput > div > div > div > svg {
-        display: none !important;
-    }
-    
-    /* Header styling */
+
+    /* --- HEADER STYLING --- */
     .header-container {
-        /* Gradiente forte */
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-        color: white;
-        padding: 2.5rem;
+        background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
+        color: white; /* Always white text on this gradient */
+        padding: 2rem;
         border-radius: 15px;
         margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         text-align: center;
     }
     
     .main-title {
-        font-size: 2.8em;
-        font-weight: bold;
+        font-size: 2.5rem;
+        font-weight: 700;
         margin: 0;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        color: white !important;
     }
     
     .subtitle {
-        font-size: 1.1em;
-        margin-top: 0.5em;
-        opacity: 0.95;
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+        opacity: 0.9;
+        color: white !important;
         font-weight: 300;
     }
-    
-    /* Message styling */
-    .stChatMessage {
-        border-radius: 12px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
-    
-    /* User message */
-    .stChatMessage:has(.stAvatar:contains("user")) {
-        background-color: #E8F4F8; /* Light blue tint */
-        border-left: 4px solid var(--primary-color);
-    }
-    
-    /* Assistant message */
-    .stChatMessage:has(.stAvatar:contains("assistant")) {
-        background-color: #F0E8F8; /* Light purple tint */
-        border-left: 4px solid var(--secondary-color);
-    }
-    
-    /* Sidebar styling */
-    .sidebar .sidebar-content {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-    }
-    
-    /* Info cards */
+
+    /* --- SIDEBAR INFO CARD --- */
     .info-card {
-        background: white;
+        /* Use Streamlit's native secondary background (light gray in light mode, dark gray in dark mode) */
+        background-color: var(--secondary-background-color);
+        border: 1px solid rgba(128, 128, 128, 0.2);
         border-radius: 12px;
-        padding: 1.5rem;
+        padding: 1.2rem;
         margin-bottom: 1rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        border-left: 4px solid var(--primary-color);
+        border-left: 4px solid var(--brand-primary);
     }
     
     .info-card h3 {
-        color: var(--primary-color);
+        color: var(--brand-primary) !important;
         margin-top: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
     }
     
-    /* Examples section */
+    .info-card p, .info-card li {
+        color: var(--text-color); /* Adapts to Light/Dark automatically */
+        font-size: 0.95rem;
+    }
+
+    /* --- EXAMPLE QUESTIONS --- */
     .example-item {
-        background: #F9FAFB;
-        padding: 1rem;
+        background-color: var(--secondary-background-color);
+        border: 1px solid rgba(128, 128, 128, 0.2);
+        color: var(--text-color);
+        padding: 0.8rem;
         margin: 0.5rem 0;
         border-radius: 8px;
-        border-left: 3px solid var(--warning-color);
-        transition: all 0.3s ease;
-        cursor: pointer; /* Indica que é clicável */
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
     }
     
     .example-item:hover {
-        background: #F0E8F8;
-        transform: translateX(5px);
+        border-color: var(--brand-primary);
+        transform: translateX(3px);
+    }
+
+    /* --- CHAT INPUT ADJUSTMENT --- */
+    /* Clean up the input bottom area without breaking it */
+    .stChatInput {
+        padding-bottom: 1rem;
     }
     
-    /* Spinner styling */
-    .stSpinner {
-        color: var(--primary-color) !important;
-    }
+    /* Optional: Hide the 'Deploy' button if you want a cleaner look */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
     
-    /* Error/Success messages */
-    .stError {
-        background-color: #FFE5E5 !important;
-        border: 2px solid var(--danger-color) !important;
-        border-radius: 8px !important;
-    }
-    
-    .stSuccess {
-        background-color: #E5F9F5 !important;
-        border: 2px solid var(--success-color) !important;
-        border-radius: 8px !important;
-    }
 </style>
 """
 
 @st.cache_resource
 def get_agent():
     """Get the initialized LangChain SQL Agent (cached for performance)."""
-    # A função initialize_agent() está no agent.py
     try:
         agent_executor = initialize_agent()
         return agent_executor, True
     except Exception as e:
-        # st.error não funciona em funções com cache, então retornamos o erro para ser tratado no main
         return str(e), False
 
 def main():
@@ -207,7 +128,6 @@ def main():
             <div class="main-title">📦 Inventory Management System</div>
             <div class="subtitle">🤖 AI-Powered Natural Language Queries • Real-time Stock Analysis</div>
         </div>
-                
     """, unsafe_allow_html=True)
 
     if not DATABASE_PATH.exists():
@@ -218,76 +138,78 @@ def main():
     agent_result, success = get_agent()
     
     if not success:
-        st.error(f"❌ Failed to initialize the agent. Please check your API key and database configuration. Error: {agent_result}")
+        st.error(f"❌ Failed to initialize the agent. Error: {agent_result}")
         return
     
     agent_executor = agent_result
     
-    # --- Sidebar - Info Panel (Visualmente melhorada) ---
+    # --- Sidebar ---
     with st.sidebar:
         st.markdown("### 📊 Dashboard Info")
+        
+        # Using the CSS class .info-card defined above
         st.markdown("""
             <div class="info-card">
                 <h3>About This System</h3>
                 <p>This is an AI-powered inventory management assistant that uses natural language processing to query your database.</p>
-                <hr style="border-top: 1px solid #ddd;">
+                <hr style="margin: 10px 0; opacity: 0.2;">
                 <p><strong>Features:</strong></p>
-                <ul>
-                    <li>✅ Natural language queries</li>
-                    <li>✅ Real-time inventory search</li>
-                    <li><li>✅ SQL query generation</li>
-                    <li>✅ Conversation history</li>
+                <ul style="padding-left: 20px; margin: 0;">
+                    <li>Natural language queries</li>
+                    <li>Real-time inventory search</li>
+                    <li>SQL query generation</li>
+                    <li>Conversation history</li>
                 </ul>
             </div>
         """, unsafe_allow_html=True)
         
         st.markdown("### 💡 Example Questions")
         examples = [
-            "What are the names of the products that have less than 20 units in stock?",
-            "What is the average unit price of all products in the 'Electronics' category?",
-            "What is the total sum of quantity_in_stock for the 'Electronics' category?",
-            "How many products are in the 'Accessories' category?"
+            "What products have less than 20 units?",
+            "Average price of 'Electronics'?",
+            "Total stock value?",
+            "List all items in Accessories."
         ]
-        for i, example in enumerate(examples, 1):
+        for example in examples:
             st.markdown(f"""
                 <div class="example-item">
-                    <strong>{i}.</strong> {example}
+                    📦 {example}
                 </div>
             """, unsafe_allow_html=True)
     
     # --- Chat Logic ---
     
     if "messages" not in st.session_state:
-        st.session_state.messages = [{"role": "assistant", "content": "Hello! I'm your Intelligent Inventory Assistant. Ask me anything about your stock!"}]
+        st.session_state.messages = [
+            {"role": "assistant", "content": "Hello! I'm your Intelligent Inventory Assistant. Ask me anything about your stock!"}
+        ]
     
     # Display chat history
     for message in st.session_state.messages:
-        with st.chat_message(message["role"], avatar=None):
+        with st.chat_message(message["role"]):
             st.markdown(message["content"])
     
+    # Chat Input
     user_input = st.chat_input("💬 Ask a question about your inventory...")
     
     if user_input:
-        # Add user message to history
+        # User message
         st.session_state.messages.append({"role": "user", "content": user_input})
-        
-        # Redisplay user message
-        with st.chat_message("user", avatar=None):
+        with st.chat_message("user"):
             st.markdown(user_input)
         
-        
+        # Assistant response
         with st.spinner("🔄 Processing your question..."):
             try:
+                # Invoke agent
                 result = agent_executor.invoke({"input": user_input})
                 response = result.get("output", "Unable to process the query.")
             except Exception as e:
-                response = f"❌ Agent Execution Error: Desculpe, não consegui processar a consulta. Tente ser mais específico. Detalhes: {str(e)}"
+                response = f"❌ Error: {str(e)}"
         
         st.session_state.messages.append({"role": "assistant", "content": response})
-        
-        with st.chat_message("assistant", avatar=None):
+        with st.chat_message("assistant"):
             st.markdown(response)
 
 if __name__ == "__main__":
-    load_dotenv() 
     main()
